@@ -166,6 +166,7 @@ static void sigchld(int sig);
 static void stack(int x, int y, int w, int h, const Desktop *d);
 static void tile(Desktop *d);
 static void unmapnotify(XEvent *e);
+static void warpcursor(Client *c);
 static Bool wintoclient(Window w, Client **c, Desktop **d);
 static int xerror(Display *dis, XErrorEvent *ee);
 static int xerrorstart(Display *dis, XErrorEvent *ee);
@@ -545,6 +546,7 @@ void focus(Client *c, Desktop *d) {
     XChangeProperty(dis, root, netatoms[NET_ACTIVE], XA_WINDOW, 32,
                     PropModeReplace, (unsigned char *)&d->curr->win, 1);
 
+    warpcursor(d->curr);
     XSync(dis, False);
 }
 
@@ -1207,6 +1209,15 @@ Bool wintoclient(Window w, Client **c, Desktop **d) {
     for (int i = 0; i < DESKTOPS && !*c; i++)
         for (*d = &desktops[i], *c = (*d)->head; *c && (*c)->win != w; *c = (*c)->next);
     return (*c != NULL);
+}
+
+/**
+ * warps the mouse pointer to the center of the client c
+ */
+void warpcursor(Client *c) {
+    XWindowAttributes wa;
+    if (c && XGetWindowAttributes(dis, c->win, &wa))
+        XWarpPointer(dis, None, c->win, 0,0,0,0, wa.width/2, wa.height/2);
 }
 
 /**
