@@ -80,6 +80,7 @@ typedef struct {
 static void change_desktop(const Arg *arg);
 static void client_to_desktop(const Arg *arg);
 static void killclient();
+static void last_desktop();
 static void move_down();
 static void move_up();
 static void moveresize(const Arg *arg);
@@ -176,7 +177,7 @@ static int xerrorstart(Display *dis, XErrorEvent *ee);
  * currdeskidx  - which desktop is currently active
  */
 static Bool running = True;
-static int wh, ww, currdeskidx = 0;
+static int wh, ww, currdeskidx = 0, prevdeskidx = 0;
 static unsigned int numlockmask = 0, win_unfocus, win_focus;
 static Display *dis;
 static Window root;
@@ -262,7 +263,7 @@ void buttonpress(XEvent *e) {
  */
 void change_desktop(const Arg *arg) {
     if (arg->i == currdeskidx || arg->i < 0 || arg->i >= DESKTOPS) return;
-    Desktop *d = &desktops[currdeskidx], *n = &desktops[(currdeskidx = arg->i)];
+    Desktop *d = &desktops[(prevdeskidx = currdeskidx)], *n = &desktops[(currdeskidx = arg->i)];
     if (n->curr) XMapWindow(dis, n->curr->win);
     for (Client *c = n->head; c; c = c->next) XMapWindow(dis, c->win);
     for (Client *c = d->head; c; c = c->next) if (c != d->curr) XUnmapWindow(dis, c->win);
@@ -650,6 +651,13 @@ void killclient(void) {
     if (n < 0) { XKillClient(dis, d->curr->win); removeclient(d->curr, d); }
     else deletewindow(d->curr->win);
     if (prot) XFree(prot);
+}
+
+/**
+ * focus the previously focused desktop
+ */
+void last_desktop(void) {
+    change_desktop(&(Arg){.i = prevdeskidx});
 }
 
 /**
