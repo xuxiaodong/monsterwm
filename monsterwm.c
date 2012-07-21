@@ -396,7 +396,7 @@ void configurerequest(XEvent *e) {
     XWindowChanges wc = { ev->x, ev->y,  ev->width, ev->height, ev->border_width, ev->above, ev->detail };
     XConfigureWindow(dis, ev->window, ev->value_mask, &wc);
     XSync(dis, False);
-    tile(&desktops[currdeskidx]);
+    tile(&monitors[currmonidx].desktops[monitors[currmonidx].currdeskidx], &monitors[currmonidx]);
 }
 
 /**
