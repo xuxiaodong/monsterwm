@@ -27,12 +27,40 @@
 #define MINWSZ          50        /* minimum window size in pixels */
 #define DEFAULT_MONITOR 0         /* the monitor to focus initially */
 #define DEFAULT_DESKTOP 0         /* the desktop to focus initially */
-#define DESKTOPS        3         /* number of desktops - edit DESKTOPCHANGE keys to suit */
+#define DESKTOPS        4         /* number of desktops - edit DESKTOPCHANGE keys to suit */
 
 /* "name" desktops */
-enum { CURRENT=-1, WEB, DEV, FOO, MISC };
+enum { CURRENT=-1, WEB, DEV, FOO, NIL };
 /* "name" monitors */
 enum { BIG, SMALL };
+
+struct ml {
+    int m; /* monitor that the desktop in on  */
+    int d; /* desktop which properties follow */
+    struct {
+        int mode;  /* layout mode for desktop d of monitor m    */
+        int masz;  /* incread or decrease master area in px     */
+        Bool sbar; /* whether or not to show panel on desktop d */
+    } dl;
+};
+
+/**
+ * define initial values for each monitor and dekstop properties
+ *
+ * in the example below:
+ * - the first desktop (0) on the first monitor (0) will have
+ *   tile layout, with its master area increased by 50px and
+ *   the panel will be visible.
+ * - the third desktop (2) on the second monitor (1) will have
+ *   grid layout, with no changes to its master area and
+ *   the panel will be hidden.
+ */
+static const struct ml init[] = { \
+    /* monitor  desktop   mode    masz  sbar   */
+    {   SMALL,    WEB,  { BSTACK, 400,  False } },
+    {   BIG,      WEB,  { TILE,    0,   True  } },
+    {   BIG,      DEV,  { GRID,    0,   True  } },
+};
 
 /**
  * open applications to specified monitor and desktop
@@ -134,6 +162,7 @@ static Key keys[] = {
        DESKTOPCHANGE(    XK_F1,                             WEB)
        DESKTOPCHANGE(    XK_F2,                             DEV)
        DESKTOPCHANGE(    XK_F3,                             FOO)
+       DESKTOPCHANGE(    XK_F4,                             NIL)
        MONITORCHANGE(    XK_F1,                             BIG)
        MONITORCHANGE(    XK_F2,                             SMALL)
 };
